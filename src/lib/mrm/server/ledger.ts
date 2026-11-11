@@ -12,7 +12,7 @@ import { payloadFor } from '../contract.ts';
 const TABLE = 'mrm_ledger';
 const WINDOW = 500; // the portal shows and verifies the most recent blocks
 const MAX_BLOCKS = 20_000; // public demo: stop accepting writes rather than grow without bound
-const g = globalThis as { __mrmLedger?: Block[]; __mrmLedgerDb?: boolean };
+const g = globalThis as { __mrmLedger?: Block[]; __mrmLedgerDb?: boolean; __mrmLedgerWhy?: string };
 
 export type LedgerStore = 'supabase' | 'memory';
 
@@ -33,25 +33,36 @@ async function seedBlocks(): Promise<Block[]> {
 
 async function loadDb(): Promise<Block[] | null> {
   const db = supabase();
-  if (!db || g.__mrmLedgerDb === false) return null;
+  if (!db) {
+    g.__mrmLedgerWhy = 'SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are not both set on this deployment.';
+    return null;
+  }
+  if (g.__mrmLedgerDb === false) return null;
   const { data, error } = await db.from(TABLE).select('index, ts, actor, role, event, model_id, detail, payload_hash, prev_hash, hash').order('index', { ascending: false }).limit(WINDOW);
   if (error) {
     g.__mrmLedgerDb = false; // table missing or unreachable: fall back to memory for this instance
+    g.__mrmLedgerWhy = `Supabase could not read the mrm_ledger table (${error.message || 'no detail'}). Run supabase/migrations/0001_mrm_ledger.sql and check SUPABASE_URL.`;
     return null;
   }
   const rows = (data ?? []).map((r) => ({ ...r, index: Number(r.index), ts: new Date(r.ts).toISOString() })).reverse() as Block[];
   if (rows.length) return rows;
   const seed = await seedBlocks();
   const ins = await db.from(TABLE).insert(seed);
-  if (ins.error && ins.error.code !== '23505') return null; // 23505: another instance seeded first, which is fine
+  if (ins.error && ins.error.code !== '23505') {
+    // 23505 means another instance seeded first, which is fine. Anything else is a write refusal.
+    g.__mrmLedgerWhy = /row-level security|permission denied/i.test(ins.error.message)
+      ? 'Supabase refused the write. SUPABASE_SERVICE_ROLE_KEY holds a publishable / anon key; it must be the secret (service_role) key.'
+      : `Supabase refused the write (${ins.error.message || 'no detail'}).`;
+    return null;
+  }
   return seed;
 }
 
-export async function readLedger(): Promise<{ blocks: Block[]; store: LedgerStore }> {
+export async function readLedger(): Promise<{ blocks: Block[]; store: LedgerStore; reason?: string }> {
   const db = await loadDb();
   if (db) return { blocks: db, store: 'supabase' };
   g.__mrmLedger ??= await seedBlocks();
-  return { blocks: g.__mrmLedger, store: 'memory' };
+  return { blocks: g.__mrmLedger, store: 'memory', reason: g.__mrmLedgerWhy };
 }
 
 export async function append(input: BlockInput): Promise<Block> {

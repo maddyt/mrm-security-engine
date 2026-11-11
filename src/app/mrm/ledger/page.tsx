@@ -20,6 +20,7 @@ export default function Ledger() {
   const { api } = useMrm();
   const [blocks, setBlocks] = useState<Block[] | null>(null);
   const [store, setStore] = useState('');
+  const [why, setWhy] = useState('');
   const [error, setError] = useState('');
   const [ver, setVer] = useState<Verification | null>(null);
   const [tampered, setTampered] = useState<number | null>(null);
@@ -33,6 +34,7 @@ export default function Ledger() {
       if (!r.ok) throw new Error(`${r.status}: ${r.data.error}`);
       setBlocks(r.data.blocks);
       setStore(r.data.store);
+      setWhy(r.data.store_reason ?? '');
       setTampered(null);
       setVer(null);
     } catch (e) {
@@ -100,6 +102,7 @@ export default function Ledger() {
             <div>
               <div className="text-[10.5px] uppercase tracking-wider text-mute">Store</div>
               <div className="text-[13px] text-ink">{store === 'supabase' ? 'Supabase Postgres (persistent)' : 'Server memory (resets on restart)'}</div>
+              {store !== 'supabase' && why && <div className="mt-0.5 max-w-[340px] text-[11.5px] leading-snug text-amber">! {why}</div>}
             </div>
             <div className="min-w-[220px] flex-1">
               {ver ? (
