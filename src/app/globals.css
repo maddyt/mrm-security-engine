@@ -1,0 +1,198 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --bg: 7 10 15;
+  --panel: 13 18 26;
+  --raised: 20 27 38;
+  --line: 35 44 58;
+  --ink: 230 234 240;
+  --sub: 163 173 189;
+  --mute: 107 118 137;
+  --brand: 37 99 235;
+  --mark: 16 185 129;
+  --up: 34 197 94;
+  --down: 239 68 68;
+  --amber: 245 158 11;
+}
+
+.theme-light {
+  color-scheme: light;
+  --bg: 255 255 255;
+  --panel: 247 248 250;
+  --raised: 239 242 246;
+  --line: 223 228 235;
+  --ink: 11 18 32;
+  --sub: 63 74 90;
+  --mute: 107 118 137;
+  --brand: 37 99 235;
+  --mark: 5 150 105;
+  --up: 22 163 74;
+  --down: 220 38 38;
+  --amber: 217 119 6;
+}
+
+html,
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--ink));
+}
+
+body {
+  font-feature-settings: 'ss01', 'cv11';
+}
+
+.num {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(rgb(var(--line) / 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--line) / 0.35) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at 50% 0%, black 30%, transparent 75%);
+}
+
+.glow {
+  box-shadow: 0 0 0 1px rgb(var(--line)), 0 24px 80px -24px rgb(var(--brand) / 0.35);
+}
+
+/* Range sliders */
+input[type='range'].slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 22px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type='range'].slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(to right, var(--track, rgb(var(--brand))) var(--fill, 50%), rgb(var(--line)) var(--fill, 50%));
+}
+input[type='range'].slider::-moz-range-track {
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(to right, var(--track, rgb(var(--brand))) var(--fill, 50%), rgb(var(--line)) var(--fill, 50%));
+}
+input[type='range'].slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  margin-top: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: rgb(var(--ink));
+  border: 3px solid var(--track, rgb(var(--brand)));
+  box-shadow: 0 0 0 4px rgb(var(--brand) / 0.18);
+}
+input[type='range'].slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgb(var(--ink));
+  border: 3px solid var(--track, rgb(var(--brand)));
+}
+input[type='range'].slider:focus-visible {
+  outline: none;
+}
+input[type='range'].slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 6px rgb(var(--brand) / 0.4);
+}
+
+/* Football field bars animate between slider states. */
+.ff-anim rect,
+.ff-anim line {
+  transition: x 320ms cubic-bezier(.2, .8, .2, 1), width 320ms cubic-bezier(.2, .8, .2, 1), x1 320ms cubic-bezier(.2, .8, .2, 1), x2 320ms cubic-bezier(.2, .8, .2, 1);
+}
+
+@media print {
+  @page {
+    size: 13.333in 7.5in;
+    margin: 0;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .fit-wrap {
+    height: auto !important;
+  }
+  .fit-inner {
+    transform: none !important;
+  }
+  .page {
+    break-before: page; /* a forced break before the first page is ignored, so no trailing blank page */
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+  html,
+  body {
+    background: white !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* MRM audit binder: a portrait letter document, unlike the landscape tear sheets above. */
+@page binder {
+  size: letter portrait;
+  margin: 14mm 13mm 15mm;
+}
+.binder-doc h2 {
+  break-after: avoid;
+}
+.binder-doc tr,
+.binder-doc figure,
+.binder-doc .keep {
+  break-inside: avoid;
+}
+.binder-doc caption,
+.binder-doc thead {
+  break-after: avoid;
+}
+.binder-doc footer {
+  break-before: avoid;
+}
+@media print {
+  .binder-doc {
+    page: binder;
+    max-width: none !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  .binder-doc svg {
+    max-width: 100%;
+    height: auto;
+  }
+  .binder-doc section {
+    break-before: page;
+  }
+  .print-bare {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+}
