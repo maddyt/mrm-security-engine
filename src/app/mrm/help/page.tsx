@@ -5,6 +5,7 @@ import { DEMO_SCRIPT, FAQ, GUIDES, TERMS, term } from '@/lib/mrm/help';
 const GROUPS = ['Regulation', 'Performance', 'Explainability', 'Fair lending', 'Stability', 'Security'] as const;
 const TOC: [string, string][] = [
   ['start', 'What this is'],
+  ['why', 'Why it matters for Corestrat'],
   ['demo', 'Demo script'],
   ['pages', 'Page by page'],
   ['roles', 'Roles'],
@@ -23,6 +24,13 @@ const REGS: [string, string, string][] = [
   ['Regulation B §1002.9', 'Binder §4 · Fair Lending', 'Principal adverse action reasons'],
   ['OWASP Top 10 for LLM Applications', 'Binder §6 · Security & Threats', 'Coverage table: tested, specified, out of scope'],
   ['ISO/IEC 42001', 'Binder §6, Audit Ledger', 'Traceability and control evidence for an AI management system'],
+];
+
+const FIT: [string, string, string][] = [
+  ['IntelliDecision.ai', 'No-code platform for building and governing predictive models, including credit scorecards.', 'Consumes its outputs (KS, Gini, AUC, SHAP, WoE) unchanged and turns them into the document set a US examiner asks for. Nothing in the model-building flow changes.'],
+  ['ModelCompass.ai', 'Model governance: documentation, version control, performance monitoring, explainability, risk assessment and regulatory reporting.', 'A US-specific layer on top: the report laid out to SR 11-7’s three validation elements, Regulation B adverse action reasons, the four-fifths screen with a less-discriminatory-alternative search, and a sign-off that only an independent validator can give.'],
+  ['Rule.ai', 'Business rule engine that centralises decision rules and strategies.', 'Tests what happens at the rule boundary: how many near-miss applicants can cross a cut-off by padding an input, and which control actually stops them.'],
+  ['GenInsight.ai / Gaia', 'Natural-language analytics over enterprise data.', 'A prompt-injection guard and output filter with a test corpus, and a coverage statement against the OWASP Top 10 for LLM Applications that a bank’s security team can review.'],
 ];
 
 const h2 = 'scroll-mt-28 text-[19px] font-semibold tracking-tight text-ink';
@@ -71,6 +79,56 @@ export default function HelpPage() {
           <p className="text-[12.5px] text-mute">
             Two controls sit in the top bar on every page. <span className="text-sub">Model</span> switches the whole portal between the three models in the inventory. <span className="text-sub">Signed in as</span> switches your role, which changes what the gateway lets you do.
           </p>
+        </div>
+      </section>
+
+      <section className="mt-9 space-y-3">
+        <h2 id="why" className={h2}>Why it matters for Corestrat</h2>
+        <div className={`${card} space-y-3 text-[13px] leading-relaxed text-sub`}>
+          <p>
+            Corestrat’s stack already builds models, governs them and explains them. What a US bank adds is a buyer-side obligation: under SR 11-7 the bank stays responsible for any model it uses, including a vendor’s, and must be able to show its own examiners evidence in a specific shape. A platform can be strong and still lose a US deal because the bank’s model risk and security teams cannot get that evidence out of it quickly.
+          </p>
+          <p>This adapter is a worked example of closing that gap without touching the platform. It reads what the stack already produces and returns the package those two teams ask for.</p>
+        </div>
+        <div className={`${card} overflow-x-auto p-0 sm:p-0`}>
+          <table className="w-full min-w-[720px] text-[12.5px]">
+            <thead>
+              <tr className="border-b border-line/60 text-left text-[10.5px] uppercase tracking-wider text-mute">
+                <th className="px-4 py-2.5 font-medium">Corestrat product</th>
+                <th className="px-4 py-2.5 font-medium">What it does today (public description)</th>
+                <th className="px-4 py-2.5 font-medium">What this adapter adds for a US bank</th>
+              </tr>
+            </thead>
+            <tbody>
+              {FIT.map(([a, b, c]) => (
+                <tr key={a} className="border-b border-line/40 align-top last:border-0">
+                  <td className="whitespace-nowrap px-4 py-2.5 font-medium text-ink">{a}</td>
+                  <td className="px-4 py-2.5 text-sub">{b}</td>
+                  <td className="px-4 py-2.5 text-sub">{c}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          {[
+            ['Shorter bank due diligence', 'A US bank’s model risk team validates a vendor model before it goes live. Handing them a binder already organised the way their examiners read it removes weeks of back-and-forth.'],
+            ['An answer for the security review', 'Banks now ask AI vendors how they handle prompt injection, model extraction and audit-trail integrity. Measured test results and a stated residual risk are a stronger answer than a policy document.'],
+            ['Independence by design', 'SR 11-7 expects validation by people who did not build the model. Because the adapter sits outside the platform and enforces that separation, the bank’s second line can run it themselves.'],
+          ].map(([t, d]) => (
+            <div key={t} className={card}>
+              <div className="text-[13px] font-semibold text-ink">{t}</div>
+              <p className="mt-1.5 text-[12.5px] leading-relaxed text-sub">{d}</p>
+            </div>
+          ))}
+        </div>
+        <div className={`${card} text-[12.5px] leading-relaxed text-sub`}>
+          <div className="text-[13px] font-semibold text-ink">Where this may not add value</div>
+          <ul className="mt-2 list-disc space-y-1 pl-4 marker:text-mute">
+            <li>It was built from public descriptions only. ModelCompass.ai may already produce some of this, in which case the useful part is the US-specific framing and the security tests.</li>
+            <li>It matters only if US regulated lenders are a target market. For buyers in Asia or the Middle East the same pattern would need those regulators’ frameworks instead.</li>
+            <li>It is a demonstration on synthetic data, not a product. Field names follow an assumed contract and would be mapped to the real schema at integration.</li>
+          </ul>
         </div>
       </section>
 
